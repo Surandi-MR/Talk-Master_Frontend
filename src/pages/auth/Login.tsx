@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {  useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Logo } from "@/components/common/Logo";
@@ -7,33 +7,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { setUser, setToken } from "@/store/slices/authSlice";
 import { Loader2 } from "lucide-react";
-import { UserRole } from "@/types";
+import axios from "axios";
 
 export function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
-      const mockAdmin = {
-        id: "1",
-        firstName: "Admin",
-        lastName: "User",
-        email: "admin@talkmaster.com",
-        phone_no: "12345",
-        role: "ADMIN" as UserRole,
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-      };
+    const username = (document.getElementById("username") as HTMLInputElement).value;
+    const password = (document.getElementById("password") as HTMLInputElement).value;
+  
+    try {
+      // API call to login
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/login`,
+        {
+          email: username,
+          password,
+        }
+      );
+      const { user, token } = response.data;
 
-      dispatch(setUser(mockAdmin));
-      dispatch(setToken("mock-token"));
+      dispatch(setUser(user));
+      dispatch(setToken(token));
+
       navigate("/dashboard");
+
+    } catch (error) {
+      console.error("Login failed:", error);
+      alert("Login failed. Please try again.");
+      
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

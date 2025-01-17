@@ -43,3 +43,9 @@ export interface Availability {
   endTime: string;
   isBooked: boolean;
 }
+
+export interface Link {
+    name: string;
+    href: string;
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  }

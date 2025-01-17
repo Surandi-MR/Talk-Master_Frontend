@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Bell, User, Pencil, Camera, Lock } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
@@ -16,7 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,18 +42,31 @@ export function Header({ children }: HeaderProps) {
     phone_no: user?.phone_no || '',
     avatar: user?.avatar || '',
   });
+
+  useEffect(() => {
+    setProfileData({
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      email: user?.email || '',
+      phone_no: user?.phone_no || '',
+      avatar: user?.avatar || '',
+    });
+  }, [user]);
+  
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
 
-  const fileInputRef = useState<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
-  };
+ const handleLogout = () => {
+   dispatch(logout());
+   localStorage.removeItem("authToken");
+   localStorage.removeItem("user");
+   navigate("/login");
+ };
 
   const handleSaveProfile = () => {
     // Here you would typically make an API call to update the user profile
