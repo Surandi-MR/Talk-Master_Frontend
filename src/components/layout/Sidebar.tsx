@@ -8,6 +8,8 @@ import {
   Calendar,
   History,
   Users,
+  GraduationCap,
+  UserCheck,
 } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
 
@@ -16,34 +18,30 @@ interface SidebarProps {
   isMobile?: boolean;
 }
 
-export function Sidebar({ onNavigate , isMobile}: SidebarProps) {
+export function Sidebar({ onNavigate, isMobile }: SidebarProps) {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const navigation = {
-    student: [
+    STUDENT: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Packages', href: '/packages', icon: Package },
       { name: 'My Sessions', href: '/sessions', icon: Calendar },
       { name: 'History', href: '/history', icon: History },
     ],
-    instructor: [
+    INSTRUCTOR: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Schedule', href: '/schedule', icon: Calendar },
       { name: 'History', href: '/history', icon: History },
     ],
-    admin: [
+    ADMIN: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { name: 'Users', href: '/users', icon: Users },
+      { name: 'Students', href: '/students', icon: GraduationCap },
+      { name: 'Instructors', href: '/instructors', icon: UserCheck },
       { name: 'Packages', href: '/packages', icon: Package },
     ],
   };
 
-  const links = navigation[user?.role as keyof typeof navigation] || [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Packages", href: "/packages", icon: Package },
-    { name: "My Sessions", href: "/sessions", icon: Calendar },
-    { name: "History", href: "/history", icon: History },
-  ];
+  const links = navigation[user?.role as keyof typeof navigation] || navigation.STUDENT;
 
   return (
     <div className="flex h-full flex-col bg-[#0A192F] text-white">

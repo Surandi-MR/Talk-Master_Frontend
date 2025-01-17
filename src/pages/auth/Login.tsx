@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { Logo } from '@/components/common/Logo';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { setUser, setToken } from '@/store/slices/authSlice';
-import { Loader2 } from 'lucide-react';
-import { UserRole } from '@/types';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Logo } from "@/components/common/Logo";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { setUser, setToken } from "@/store/slices/authSlice";
+import { Loader2 } from "lucide-react";
+import { UserRole } from "@/types";
 
 export function Login() {
   const navigate = useNavigate();
@@ -19,19 +19,19 @@ export function Login() {
     setIsLoading(true);
 
     setTimeout(() => {
-      const mockInstructor = {
-         id: '1',
-        firstName: "ss",
-        lastName: "rr",
-        email: "ss@rr",
+      const mockAdmin = {
+        id: "1",
+        firstName: "Admin",
+        lastName: "User",
+        email: "admin@talkmaster.com",
         phone_no: "12345",
-        role: "STUDENT" as UserRole,
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
+        role: "ADMIN" as UserRole,
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
       };
 
-      dispatch(setUser(mockInstructor));
-      dispatch(setToken('mock-token'));
-      navigate('/dashboard');
+      dispatch(setUser(mockAdmin));
+      dispatch(setToken("mock-token"));
+      navigate("/dashboard");
       setIsLoading(false);
     }, 1000);
   };
@@ -78,7 +78,7 @@ export function Login() {
                 Please wait
               </>
             ) : (
-              'Sign In'
+              "Sign In"
             )}
           </Button>
         </form>
