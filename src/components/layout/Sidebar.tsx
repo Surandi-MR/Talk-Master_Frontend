@@ -7,11 +7,12 @@ import {
   Package,
   Calendar,
   History,
-  Users,
   GraduationCap,
   UserCheck,
 } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
+import { useEffect, useState } from 'react';
+import { Link } from '@/types';
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -20,6 +21,8 @@ interface SidebarProps {
 
 export function Sidebar({ onNavigate, isMobile }: SidebarProps) {
   const user = useSelector((state: RootState) => state.auth.user);
+
+  const [links, setLinks] = useState<Link[]>([]);
 
   const navigation = {
     STUDENT: [
@@ -41,7 +44,10 @@ export function Sidebar({ onNavigate, isMobile }: SidebarProps) {
     ],
   };
 
-  const links = navigation[user?.role as keyof typeof navigation] || navigation.STUDENT;
+  useEffect(() => {
+    setLinks(navigation[user?.role as keyof typeof navigation] || []);
+  }, [user]);
+
 
   return (
     <div className="flex h-full flex-col bg-[#0A192F] text-white">
