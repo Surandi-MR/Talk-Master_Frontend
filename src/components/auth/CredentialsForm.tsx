@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface CredentialsFormProps {
   onPrevious: () => void;
@@ -19,29 +19,21 @@ export function CredentialsForm({ onPrevious }: CredentialsFormProps) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Confirm Password</Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          className="bg-white/5"
-          required
-        />
+        <Input id="confirmPassword" type="password" className="bg-white/5" required />
       </div>
       <div className="flex gap-4">
-        <Button
+        <Button 
           type="button"
-          variant="outline"
-          className="flex-1 bg-[#DC2626] hover:bg-[#B91C1C]"
+          variant="outline" 
+          className="flex-1"
           onClick={() => {
-            const form = document.querySelector("form");
+            const form = document.querySelector('form');
             if (form) form.reset();
           }}
         >
           Clear
         </Button>
-        <Button
-          type="submit"
-          className="flex-1 bg-[#DC2626] hover:bg-[#B91C1C]"
-        >
+        <Button type="submit" className="flex-1 bg-[#DC2626] hover:bg-[#B91C1C]">
           Submit
         </Button>
       </div>

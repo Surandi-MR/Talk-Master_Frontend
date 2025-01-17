@@ -20,10 +20,12 @@ export function Login() {
 
     setTimeout(() => {
       const mockInstructor = {
-        id: "2",
-        email: "instructor@example.com",
-        name: "Sarah Johnson",
-        role: "student" as UserRole,
+         id: '1',
+        firstName: "ss",
+        lastName: "rr",
+        email: "ss@rr",
+        phone_no: "12345",
+        role: "STUDENT" as UserRole,
         avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
       };
 
