@@ -1,14 +1,21 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Calendar } from 'lucide-react';
+import { Clock, Calendar, Pencil, Trash } from 'lucide-react';
 import type { Package } from '@/types';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 interface PackageCardProps {
   package: Package;
-  onActivate: (packageId: string) => void;
+  onActivate?: (packageId: string) => void;
+  onEdit?: (pkg: Package) => void;
+  onDelete?: (packageId: string) => void;
 }
 
-export function PackageCard({ package: pkg, onActivate }: PackageCardProps) {
+export function PackageCard({ package: pkg, onActivate, onEdit, onDelete }: PackageCardProps) {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const isAdmin = user?.role === 'ADMIN';
+
   return (
     <Card className="flex flex-col h-full">
       <CardHeader>
@@ -31,12 +38,33 @@ export function PackageCard({ package: pkg, onActivate }: PackageCardProps) {
         <p className="text-muted-foreground">{pkg.description}</p>
       </CardContent>
       <CardFooter>
-        <Button 
-          className="w-full bg-[#4ade80] hover:bg-[#22c55e]"
-          onClick={() => onActivate(pkg.id)}
-        >
-          Activate Package
-        </Button>
+        {isAdmin ? (
+          <div className="flex gap-2 w-full">
+            <Button 
+              variant="outline"
+              className="flex-1"
+              onClick={() => onEdit?.(pkg)}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+            <Button 
+              variant="destructive"
+              className="flex-1"
+              onClick={() => onDelete?.(pkg.id)}
+            >
+              <Trash className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          </div>
+        ) : (
+          <Button 
+            className="w-full bg-[#4ade80] hover:bg-[#22c55e]"
+            onClick={() => onActivate?.(pkg.id)}
+          >
+            Activate Package
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

@@ -9,6 +9,8 @@ import { Register } from './pages/auth/Register';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { Dashboard } from './pages/dashboard';
 import { Packages } from './pages/packages';
+import { Students } from './pages/students';
+import { Instructors } from './pages/instructors';
 import { Sessions } from './pages/sessions';
 import { Schedule } from './pages/schedule';
 import { History } from './pages/history';
@@ -43,6 +45,22 @@ export function App() {
               element={
                 <DashboardLayout>
                   <Packages />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/students"
+              element={
+                <DashboardLayout>
+                  <Students />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/instructors"
+              element={
+                <DashboardLayout>
+                  <Instructors />
                 </DashboardLayout>
               }
             />
