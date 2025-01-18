@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Logo } from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
 import { RegisterForm } from '@/components/auth/RegisterForm';
@@ -6,6 +7,8 @@ import { CredentialsForm } from '@/components/auth/CredentialsForm';
 
 export function Register() {
   const [step, setStep] = useState(1);
+  const [userDetails, setUserDetails] = useState({});
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#0A192F] text-white grid md:grid-cols-2 grid-cols-1">
@@ -18,13 +21,16 @@ export function Register() {
                 Hello.
               </h1>
               <p className="text-gray-300 text-center">
-                Enter your personal details and start journey with us
+                Enter your personal details and start your journey with us
               </p>
             </div>
           </div>
           <div className="bg-white/10 p-6 md:p-12 backdrop-blur-lg flex items-center justify-center">
             <div className="max-w-md mx-auto">
-              <RegisterForm onNext={() => setStep(2)} />
+              <RegisterForm
+                onNext={() => setStep(2)}
+                setUserDetails={setUserDetails}
+              />
             </div>
           </div>
         </>
@@ -36,7 +42,7 @@ export function Register() {
               Welcome!
             </h1>
             <p className="text-gray-300 text-center md:text-left">
-              To keep connected with us please login with your username password
+              To keep connected with us, please choose your password
             </p>
             <Button
               variant="outline"
@@ -48,7 +54,10 @@ export function Register() {
           </div>
           <div className="bg-white/10 p-6 md:p-12 backdrop-blur-lg">
             <div className="max-w-md mx-auto">
-              <CredentialsForm onPrevious={() => setStep(1)} />
+              <CredentialsForm
+                userDetails={userDetails}
+                onSuccess={() => navigate("/login")}
+              />
             </div>
           </div>
         </>
