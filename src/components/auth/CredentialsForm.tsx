@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,13 +7,10 @@ import axios from "axios";
 
 interface CredentialsFormProps {
   userDetails: { [key: string]: string };
-  onSuccess: () => void;
 }
 
-export function CredentialsForm({
-  userDetails,
-  onSuccess,
-}: CredentialsFormProps) {
+export function CredentialsForm({ userDetails }: CredentialsFormProps) {
+  const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const password = (document.getElementById("password") as HTMLInputElement)
@@ -37,8 +35,8 @@ export function CredentialsForm({
       await axios.post("http://localhost:8080/register", data);
 
       toast.success("Registration successful!");
-      onSuccess();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      navigate("/login");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error(error);
       if (error.response && error.response.data && error.response.data.error) {
@@ -65,7 +63,11 @@ export function CredentialsForm({
         />
       </div>
       <div className="flex gap-4">
-        <Button type="reset" variant="outline" className="flex-1">
+        <Button
+          type="reset"
+          variant="outline"
+          className="flex-1 text-[#0A192F] hover:bg-slate-300"
+        >
           Clear
         </Button>
         <Button
