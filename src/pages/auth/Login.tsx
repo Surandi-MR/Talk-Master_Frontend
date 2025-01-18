@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { setUser, setToken } from "@/store/slices/authSlice";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
+import { toast } from "sonner";
 
 export function Login() {
   const navigate = useNavigate();
@@ -40,8 +41,7 @@ export function Login() {
 
     } catch (error) {
       console.error("Login failed:", error);
-      alert("Login failed. Please try again.");
-      
+      toast.error("Login failed. Please try again.");      
     } finally {
       setIsLoading(false);
     }

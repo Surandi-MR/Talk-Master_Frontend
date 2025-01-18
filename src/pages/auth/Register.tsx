@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Logo } from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
 import { RegisterForm } from '@/components/auth/RegisterForm';
@@ -8,7 +7,7 @@ import { CredentialsForm } from '@/components/auth/CredentialsForm';
 export function Register() {
   const [step, setStep] = useState(1);
   const [userDetails, setUserDetails] = useState({});
-  const navigate = useNavigate();
+  
 
   return (
     <div className="min-h-screen bg-[#0A192F] text-white grid md:grid-cols-2 grid-cols-1">
@@ -28,7 +27,7 @@ export function Register() {
           <div className="bg-white/10 p-6 md:p-12 backdrop-blur-lg flex items-center justify-center">
             <div className="max-w-md mx-auto">
               <RegisterForm
-                onNext={() => setStep(2)}
+                setStep={setStep}
                 setUserDetails={setUserDetails}
               />
             </div>
@@ -46,17 +45,16 @@ export function Register() {
             </p>
             <Button
               variant="outline"
-              className="border-white/20 hover:bg-white/5 w-full md:w-auto"
+              className="flex-1 text-[#0A192F] hover:bg-slate-300"
               onClick={() => setStep(1)}
             >
               ← PREVIOUS
             </Button>
           </div>
-          <div className="bg-white/10 p-6 md:p-12 backdrop-blur-lg">
+          <div className="bg-white/10 p-6 md:p-12 backdrop-blur-lg ">
             <div className="max-w-md mx-auto">
               <CredentialsForm
                 userDetails={userDetails}
-                onSuccess={() => navigate("/login")}
               />
             </div>
           </div>

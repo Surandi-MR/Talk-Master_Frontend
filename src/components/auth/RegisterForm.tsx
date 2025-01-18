@@ -1,22 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
-import { toast } from "sonner"; // Assuming you're using Sonner for notifications
+import { toast } from "sonner";
 
 interface RegisterFormProps {
-  onNext: () => void;
+  setStep: React.Dispatch<React.SetStateAction<number>>;
   setUserDetails: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
-export function RegisterForm({ onNext, setUserDetails }: RegisterFormProps) {
+export function RegisterForm({ setStep, setUserDetails }: RegisterFormProps) {
   const [formValues, setFormValues] = useState({
     firstName: "",
     lastName: "",
     email: "",
     phone_no: "",
-    gender: "male",
+    birthday: "",
   });
 
   const handleChange = (
@@ -27,9 +26,9 @@ export function RegisterForm({ onNext, setUserDetails }: RegisterFormProps) {
   };
 
   const validateForm = () => {
-    const { firstName, lastName, email, phone_no } = formValues;
+    const { firstName, lastName, email, phone_no, birthday } = formValues;
 
-    if (!firstName || !lastName || !email || !phone_no) {
+    if (!firstName || !lastName || !email || !phone_no || !birthday) {
       toast.error("All fields are required!");
       return false;
     }
@@ -43,7 +42,6 @@ export function RegisterForm({ onNext, setUserDetails }: RegisterFormProps) {
       toast.error("Phone number must be 10 digits!");
       return false;
     }
-
     return true;
   };
 
@@ -51,7 +49,7 @@ export function RegisterForm({ onNext, setUserDetails }: RegisterFormProps) {
     e.preventDefault();
     if (validateForm()) {
       setUserDetails(formValues);
-      onNext();
+      setStep(2);
     }
   };
 
@@ -66,7 +64,6 @@ export function RegisterForm({ onNext, setUserDetails }: RegisterFormProps) {
             className="bg-white/5"
             value={formValues.firstName}
             onChange={handleChange}
-            required
           />
         </div>
         <div className="space-y-2">
@@ -76,7 +73,6 @@ export function RegisterForm({ onNext, setUserDetails }: RegisterFormProps) {
             className="bg-white/5"
             value={formValues.lastName}
             onChange={handleChange}
-            required
           />
         </div>
       </div>
@@ -88,7 +84,6 @@ export function RegisterForm({ onNext, setUserDetails }: RegisterFormProps) {
           className="bg-white/5"
           value={formValues.email}
           onChange={handleChange}
-          required
         />
       </div>
       <div className="space-y-2">
@@ -99,28 +94,19 @@ export function RegisterForm({ onNext, setUserDetails }: RegisterFormProps) {
           className="bg-white/5"
           value={formValues.phone_no}
           onChange={handleChange}
-          required
         />
       </div>
       <div className="space-y-2">
-        <Label>Gender</Label>
-        <RadioGroup
-          value={formValues.gender}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormValues((prev) => ({ ...prev, gender: e.target.value }))
-          }
-          className="flex gap-4"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="male" id="male" />
-            <Label htmlFor="male">Male</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="female" id="female" />
-            <Label htmlFor="female">Female</Label>
-          </div>
-        </RadioGroup>
+        <Label htmlFor="birthday">Birthday</Label>
+        <Input
+          id="birthday"
+          type="date"
+          className="bg-white/5"
+          value={formValues.birthday}
+          onChange={handleChange}
+        />
       </div>
+
       <Button type="submit" className="w-full bg-[#DC2626] hover:bg-[#B91C1C]">
         NEXT →
       </Button>
