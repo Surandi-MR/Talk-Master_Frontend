@@ -1,39 +1,77 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import axios from "axios";
 
 interface CredentialsFormProps {
-  onPrevious: () => void;
+  userDetails: { [key: string]: string };
+  onSuccess: () => void;
 }
 
-export function CredentialsForm({ onPrevious }: CredentialsFormProps) {
+export function CredentialsForm({
+  userDetails,
+  onSuccess,
+}: CredentialsFormProps) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const password = (document.getElementById("password") as HTMLInputElement)
+      .value;
+    const confirmPassword = (
+      document.getElementById("confirmPassword") as HTMLInputElement
+    ).value;
+
+    if (!password || password.length < 5) {
+      toast.error("Password must be at least 4 characters!");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+
+    const data = { ...userDetails, password };
+
+    try {
+      await axios.post("http://localhost:8080/register", data);
+
+      toast.success("Registration successful!");
+      onSuccess();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    }
+  };
+
   return (
-    <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-      <div className="space-y-2">
-        <Label htmlFor="username">Username</Label>
-        <Input id="username" className="bg-white/5" required />
-      </div>
+    <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-2">
         <Label htmlFor="password">Choose a Password</Label>
         <Input id="password" type="password" className="bg-white/5" required />
       </div>
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Confirm Password</Label>
-        <Input id="confirmPassword" type="password" className="bg-white/5" required />
+        <Input
+          id="confirmPassword"
+          type="password"
+          className="bg-white/5"
+          required
+        />
       </div>
       <div className="flex gap-4">
-        <Button 
-          type="button"
-          variant="outline" 
-          className="flex-1"
-          onClick={() => {
-            const form = document.querySelector('form');
-            if (form) form.reset();
-          }}
-        >
+        <Button type="reset" variant="outline" className="flex-1">
           Clear
         </Button>
-        <Button type="submit" className="flex-1 bg-[#DC2626] hover:bg-[#B91C1C]">
+        <Button
+          type="submit"
+          className="flex-1 bg-[#DC2626] hover:bg-[#B91C1C]"
+        >
           Submit
         </Button>
       </div>
