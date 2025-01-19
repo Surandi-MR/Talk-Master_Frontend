@@ -40,7 +40,7 @@ interface InstructorDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function InstructorDetailsDialog({ instructor, open, onOpenChange }: InstructorDetailsDialogProps) {
+export default function InstructorDetailsDialog({ instructor, open, onOpenChange }: InstructorDetailsDialogProps) {
   const handleDeactivate = () => {
     // Here you would typically make an API call to deactivate the instructor
     console.log('Deactivating instructor:', instructor.id);

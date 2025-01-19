@@ -10,17 +10,11 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { format } from 'date-fns';
+import axiosInstance from '@/lib/axiosInstance';
+import { toast } from "sonner";
+import InstructorDetailsDialog from './components/InstructorDetailsDialog';
 
 // Mock data for demonstration
 const MOCK_INSTRUCTORS = [
@@ -60,77 +54,10 @@ const MOCK_INSTRUCTORS = [
   },
 ];
 
-interface InstructorDetailsDialogProps {
-  instructor: typeof MOCK_INSTRUCTORS[0];
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
 interface AddInstructorFormData {
   firstName: string;
   lastName: string;
   email: string;
-}
-
-function InstructorDetailsDialog({ instructor, open, onOpenChange }: InstructorDetailsDialogProps) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Instructor Details</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-6">
-          {/* Personal Information */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-semibold mb-2">Personal Information</h3>
-              <div className="space-y-2">
-                <p><span className="font-medium">Name:</span> {instructor.firstName} {instructor.lastName}</p>
-                <p><span className="font-medium">Email:</span> {instructor.email}</p>
-                <p><span className="font-medium">Phone:</span> {instructor.phone_no}</p>
-                <p><span className="font-medium">Gender:</span> {instructor.gender}</p>
-                <p><span className="font-medium">Joined Date:</span> {format(new Date(instructor.joinedDate), 'PPP')}</p>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Performance</h3>
-              <div className="space-y-2">
-                <p><span className="font-medium">Rating:</span> {instructor.rating}/5.0</p>
-                <p><span className="font-medium">Total Sessions:</span> {instructor.totalSessions}</p>
-                <p><span className="font-medium">Completed Sessions:</span> {instructor.completedSessions}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Upcoming Sessions Table */}
-          <div>
-            <h3 className="font-semibold mb-2">Upcoming Sessions</h3>
-            <div className="border rounded-lg">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Student</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {instructor.upcomingSessions.map((session) => (
-                    <TableRow key={session.id}>
-                      <TableCell>{format(new Date(session.date), 'PPP')}</TableCell>
-                      <TableCell>{session.time}</TableCell>
-                      <TableCell>{session.student}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 export function Instructors() {
@@ -151,9 +78,22 @@ export function Instructors() {
     }
   };
 
-  const handleCreate = () => {
-    // Here you would typically make an API call to create the instructor
+  const handleCreate = async () => {
     console.log('Creating instructor:', formData);
+    // Make a POST request to create the instructor
+    try {
+      await axiosInstance.post("/api/user/create", formData);
+      toast.success("Registration successful!");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    }
+    
     setIsAddOpen(false);
     setFormData({ firstName: '', lastName: '', email: '' });
   };
