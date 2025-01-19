@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import axiosInstance from '@/lib/axiosInstance';
 import { toast } from "sonner";
-import InstructorDetailsDialog from './components/InstructorDetailsDialog';
+import InstructorDetailsDialog from "./components/InstructorDetailsDialog";
 
 // Mock data for demonstration
 const MOCK_INSTRUCTORS = [
@@ -79,21 +79,25 @@ export function Instructors() {
   };
 
   const handleCreate = async () => {
-    console.log('Creating instructor:', formData);
-    // Make a POST request to create the instructor
-    try {
-      await axiosInstance.post("/api/user/create", formData);
-      toast.success("Registration successful!");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.error(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("Something went wrong. Please try again.");
-      }
-    }
-    
+    axiosInstance
+      .post("/api/user/create", { ...formData, role: "INSTRUCTOR" })
+      .then(() => {
+        toast.success(
+          "Registration successful! Generated password is sent to the email provided."
+        );
+      })
+      .catch((error) => {
+        console.error(error);
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.error
+        ) {
+          toast.error(error.response.data.error);
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
+      });
     setIsAddOpen(false);
     setFormData({ firstName: '', lastName: '', email: '' });
   };
