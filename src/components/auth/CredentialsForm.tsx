@@ -32,7 +32,7 @@ export function CredentialsForm({ userDetails }: CredentialsFormProps) {
     const data = { ...userDetails, password };
 
     try {
-      await axios.post("http://localhost:8080/register", data);
+      await axios.post(`${import.meta.env.VITE_BASE_URL}/register`, data);
 
       toast.success("Registration successful!");
       navigate("/login");
