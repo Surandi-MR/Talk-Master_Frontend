@@ -21,8 +21,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { RootState } from '@/store';
-import { logout } from '@/store/slices/authSlice';
+import { logout, setUser } from "@/store/slices/authSlice";
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '@/lib/axiosInstance';
+import { toast } from 'sonner';
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -69,8 +71,25 @@ export function Header({ children }: HeaderProps) {
  };
 
   const handleSaveProfile = () => {
-    // Here you would typically make an API call to update the user profile
-    console.log('Saving profile:', profileData);
+    if (!user) return;
+    axiosInstance
+      .put(`/api/user/${user.id}`, profileData)
+      .then((response) => {
+        dispatch(setUser(response.data));
+        toast.success("Profile updated successfully");
+      })
+      .catch((error) => {
+        console.error(error);
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.error
+        ) {
+          toast.error(error.response.data.error);
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
+      });
     setIsEditing(false);
   };
 
