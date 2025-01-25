@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import axiosInstance from "@/lib/axiosInstance";
+import { toast } from "sonner";
 
 // Mock data for demonstration
 const MOCK_STUDENTS = [
@@ -88,8 +90,25 @@ export function Students() {
   };
 
   const handleCreate = () => {
-    // Here you would typically make an API call to create the student
-    console.log('Creating student:', formData);
+    axiosInstance
+      .post("/api/user/create", { ...formData, role: "STUDENT" })
+      .then(() => {
+        toast.success(
+          "Registration successful! Generated password is sent to the email provided."
+        );
+      })
+      .catch((error) => {
+        console.error(error);
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.error
+        ) {
+          toast.error(error.response.data.error);
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
+      });
     setIsAddOpen(false);
     setFormData({ firstName: '', lastName: '', email: '' });
   };
