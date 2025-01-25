@@ -56,9 +56,9 @@ export function Header({ children }: HeaderProps) {
   }, [user]);
   
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -77,6 +77,7 @@ export function Header({ children }: HeaderProps) {
       .then((response) => {
         dispatch(setUser(response.data));
         toast.success("Profile updated successfully");
+        
       })
       .catch((error) => {
         console.error(error);
@@ -104,9 +105,32 @@ export function Header({ children }: HeaderProps) {
   };
 
   const handlePasswordChange = () => {
-    // Here you would typically make an API call to change the password
-    console.log('Changing password:', passwordData);
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    if(passwordData.newPassword != passwordData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    
+    axiosInstance
+      .put(`/api/user/update-password/${user?.id}`, {
+        oldPassword: passwordData.oldPassword,
+        newPassword: passwordData.newPassword,
+      })
+      .then(() => {
+        toast.success("Password changed successfully");
+      })
+      .catch((error) => {
+        console.error(error);
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.error
+        ) {
+          toast.error(error.response.data.error);
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
+      });
+    setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
     setIsPasswordDialogOpen(false);
   };
 
@@ -253,8 +277,8 @@ export function Header({ children }: HeaderProps) {
               <Label>Current Password</Label>
               <Input
                 type="password"
-                value={passwordData.currentPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                value={passwordData.oldPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
               />
             </div>
             <div className="grid gap-2">
