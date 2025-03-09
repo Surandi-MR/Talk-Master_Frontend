@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import packageReducer from './slices/packageSlice';
 import sessionReducer from './slices/sessionSlice';
 import availabilityReducer from './slices/availabilitySlice';
+import studentsReducer from './slices/studentsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     packages: packageReducer,
     sessions: sessionReducer,
     availability: availabilityReducer,
+    students: studentsReducer,
   },
 });
 

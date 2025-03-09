@@ -1,69 +1,33 @@
-import { useState } from 'react';
-import { StudentCard } from './components/StudentCard';
-import { StudentDetailsDialog } from './components/StudentDetailsDialog';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { StudentCard } from "./components/StudentCard";
+import { StudentDetailsDialog } from "./components/StudentDetailsDialog";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { setStudents } from "@/store/slices/studentsSlice";
 
-// Mock data for demonstration
-const MOCK_STUDENTS = [
-  {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone_no: '+1234567890',
-    gender: 'Male',
-    joinedDate: '2024-01-15',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e',
-    sessions: [
-      { id: '1', date: '2024-03-15', instructor: 'Sarah Johnson', status: 'Completed' },
-      { id: '2', date: '2024-03-18', instructor: 'Michael Chen', status: 'Scheduled' },
-    ],
-    packages: [
-      {
-        id: '1',
-        name: 'Premium Package',
-        description: '20 hours of English sessions',
-        purchasedDate: '2024-02-01',
-        remainingSessions: 15,
-      },
-    ],
-  },
-  {
-    id: '2',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    email: 'jane.smith@example.com',
-    phone_no: '+1987654321',
-    gender: 'Female',
-    joinedDate: '2024-02-01',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-    sessions: [
-      { id: '3', date: '2024-03-16', instructor: 'Emma Williams', status: 'Completed' },
-      { id: '4', date: '2024-03-19', instructor: 'Sarah Johnson', status: 'Scheduled' },
-    ],
-    packages: [
-      {
-        id: '2',
-        name: 'Basic Package',
-        description: '10 hours of English sessions',
-        purchasedDate: '2024-02-15',
-        remainingSessions: 8,
-      },
-    ],
-  },
-];
+interface Student {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone_no: string;
+  birthday: string; 
+  role: string;
+  created_at: string;
+}
 
 interface AddStudentFormData {
   firstName: string;
@@ -72,21 +36,39 @@ interface AddStudentFormData {
 }
 
 export function Students() {
-  const [selectedStudent, setSelectedStudent] = useState<typeof MOCK_STUDENTS[0] | null>(null);
+  const dispatch = useDispatch();
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
+    null
+  ); // Changed to store ID only
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [formData, setFormData] = useState<AddStudentFormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
+    firstName: "",
+    lastName: "",
+    email: "",
   });
 
+  const students = useSelector(
+    (state: RootState) => state.students.students
+  ) as Student[];
+
+  useEffect(() => {
+    // Fetch students data from API
+    axiosInstance
+      .get(`/api/user/role/STUDENT`)
+      .then((response) => {
+        dispatch(setStudents(response.data));
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error("Failed to fetch students. Please try again.");
+      });
+  }, [dispatch]);
+
   const handleViewDetails = (studentId: string) => {
-    const student = MOCK_STUDENTS.find(s => s.id === studentId);
-    if (student) {
-      setSelectedStudent(student);
-      setIsDetailsOpen(true);
-    }
+    // Just set the student ID and open the dialog
+    setSelectedStudentId(studentId);
+    setIsDetailsOpen(true);
   };
 
   const handleCreate = () => {
@@ -96,6 +78,10 @@ export function Students() {
         toast.success(
           "Registration successful! Generated password is sent to the email provided."
         );
+        // Optionally, refetch the student list after creating a new student
+        axiosInstance.get(`/api/user/role/STUDENT`).then((response) => {
+          dispatch(setStudents(response.data));
+        });
       })
       .catch((error) => {
         console.error(error);
@@ -110,14 +96,14 @@ export function Students() {
         }
       });
     setIsAddOpen(false);
-    setFormData({ firstName: '', lastName: '', email: '' });
+    setFormData({ firstName: "", lastName: "", email: "" });
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Students</h1>
-        <Button 
+        <Button
           className="bg-[#DC2626] hover:bg-[#B91C1C]"
           onClick={() => setIsAddOpen(true)}
         >
@@ -127,7 +113,7 @@ export function Students() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {MOCK_STUDENTS.map((student) => (
+        {students.map((student) => (
           <StudentCard
             key={student.id}
             student={student}
@@ -136,11 +122,14 @@ export function Students() {
         ))}
       </div>
 
-      {selectedStudent && (
+      {selectedStudentId && (
         <StudentDetailsDialog
-          student={selectedStudent}
+          studentId={selectedStudentId} 
           open={isDetailsOpen}
-          onOpenChange={setIsDetailsOpen}
+          onOpenChange={(open) => {
+            setIsDetailsOpen(open);
+            if (!open) setSelectedStudentId(null);
+          }}
         />
       )}
 
@@ -156,7 +145,9 @@ export function Students() {
                 <Input
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, firstName: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -164,7 +155,9 @@ export function Students() {
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lastName: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -174,7 +167,9 @@ export function Students() {
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
               />
             </div>
           </div>
@@ -182,7 +177,7 @@ export function Students() {
             <Button variant="outline" onClick={() => setIsAddOpen(false)}>
               Cancel
             </Button>
-            <Button 
+            <Button
               className="bg-[#DC2626] hover:bg-[#B91C1C]"
               onClick={handleCreate}
             >
