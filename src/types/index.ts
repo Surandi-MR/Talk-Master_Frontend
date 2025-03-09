@@ -18,7 +18,7 @@ export interface Package {
   id: string;
   name: string;
   description: string;
-  hours: number;
+  sessions: number;
   price: number;
   isActive: boolean;
 }
