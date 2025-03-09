@@ -1,10 +1,11 @@
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -12,40 +13,144 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import axiosInstance from "@/lib/axiosInstance";
+import { toast } from "sonner";
 
-interface InstructorDetailsDialogProps {
-  instructor: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone_no: string;
-    gender: string;
-    joinedDate: string;
-    avatar: string;
-    rating: number;
-    totalSessions: number;
-    completedSessions: number;
-    upcomingSessions: Array<{
-      id: string;
-      date: string;
-      student: string;
-      time: string;
-    }>;
-  };
+// Define the structure of the detailed Instructor (matching the backend DTO)
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone_no: string;
+  birthday: string;
+  password: string;
+  role: string;
+  createdAt: string;
+}
+
+interface Session {
+  id: string;
+  studentId: string;
+  instructorId: string;
+  time: string;
+  status: string;
+  topic: string | null;
+  meetingLink: string | null;
+  studdent: User;
+  instructor: User;
+}
+
+interface PackageModel {
+  id: string;
+  name: string;
+  price: number;
+  sessions: number;
+  description: string;
+}
+
+interface UserPackage {
+  id: string;
+  userId: string;
+  packageId: string;
+  purchaseDate: string;
+  remainingSessions: number;
+  packageModel: PackageModel;
+}
+
+interface DetailedStudentResponse {
+  user: User;
+  sessions: Session[];
+  packages: UserPackage[];
+}
+
+interface StudentDetailsDialogProps {
+  studentId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function InstructorDetailsDialog({ instructor, open, onOpenChange }: InstructorDetailsDialogProps) {
+export function InstructorDetailsDialog({
+  studentId,
+  open,
+  onOpenChange,
+}: StudentDetailsDialogProps) {
+  const [studentData, setStudentData] =
+    useState<DetailedStudentResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      // Fetch detailed Instructor data when the dialog is opened
+      setLoading(true);
+      setError(null);
+      axiosInstance
+        .get(`/api/user/${studentId}`)
+        .then((response) => {
+          setStudentData(response.data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setError("Failed to fetch Instructor details. Please try again.");
+          setLoading(false);
+        });
+    }
+  }, [studentId, open]);
+
   const handleDeactivate = () => {
-    // Here you would typically make an API call to deactivate the instructor
-    console.log('Deactivating instructor:', instructor.id);
-    onOpenChange(false);
+    // Make an API call to deactivate the Instructor
+    axiosInstance
+      .put(`/api/user/${studentId}/deactivate`) // Adjust the endpoint as needed
+      .then(() => {
+        toast.success("Instructor account deactivated successfully.");
+        onOpenChange(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error(
+          "Failed to deactivate Instructor account. Please try again."
+        );
+      });
   };
+
+  if (loading) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Instructor Details</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center items-center h-64">
+            <p>Loading...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (error) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Instructor Details</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center items-center h-64">
+            <p className="text-red-500">{error}</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (!studentData) {
+    return null; 
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -53,48 +158,58 @@ export default function InstructorDetailsDialog({ instructor, open, onOpenChange
         <DialogHeader>
           <DialogTitle>Instructor Details</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Personal Information */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h3 className="font-semibold mb-2">Personal Information</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Name:</span> {instructor.firstName} {instructor.lastName}</p>
-                <p><span className="font-medium">Email:</span> {instructor.email}</p>
-                <p><span className="font-medium">Phone:</span> {instructor.phone_no}</p>
-                <p><span className="font-medium">Gender:</span> {instructor.gender}</p>
-                <p><span className="font-medium">Joined Date:</span> {format(new Date(instructor.joinedDate), 'PPP')}</p>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Performance</h3>
-              <div className="space-y-2">
-                <p><span className="font-medium">Rating:</span> {instructor.rating}/5.0</p>
-                <p><span className="font-medium">Total Sessions:</span> {instructor.totalSessions}</p>
-                <p><span className="font-medium">Completed Sessions:</span> {instructor.completedSessions}</p>
+                <p>
+                  <span className="font-medium">Name:</span>{" "}
+                  {studentData.user.firstName} {studentData.user.lastName}
+                </p>
+                <p>
+                  <span className="font-medium">Email:</span>{" "}
+                  {studentData.user.email}
+                </p>
+                <p>
+                  <span className="font-medium">Phone:</span>{" "}
+                  {studentData.user.phone_no}
+                </p>
+                <p>
+                  <span className="font-medium">Birthday:</span>{" "}
+                  {studentData.user.birthday &&
+                    format(new Date(studentData.user.birthday), "PPP")}
+                </p>
+                <p>
+                  <span className="font-medium">Joined Date:</span>{" "}
+                  {format(new Date(studentData.user.createdAt), "PPP")}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Upcoming Sessions Table */}
+          {/* Sessions Table */}
           <div>
-            <h3 className="font-semibold mb-2">Upcoming Sessions</h3>
+            <h3 className="font-semibold mb-2">Sessions</h3>
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
                     <TableHead>Student</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {instructor.upcomingSessions.map((session) => (
+                  {studentData.sessions.map((session) => (
                     <TableRow key={session.id}>
-                      <TableCell>{format(new Date(session.date), 'PPP')}</TableCell>
-                      <TableCell>{session.time}</TableCell>
-                      <TableCell>{session.student}</TableCell>
+                      <TableCell>
+                        {format(new Date(session.time), "PPP")}
+                      </TableCell>
+                      <TableCell>{`${session.studdent.firstName} ${session.studdent.lastName}`}</TableCell>
+                      <TableCell>{session.status}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -104,10 +219,7 @@ export default function InstructorDetailsDialog({ instructor, open, onOpenChange
         </div>
 
         <DialogFooter>
-          <Button 
-            variant="destructive"
-            onClick={handleDeactivate}
-          >
+          <Button variant="destructive" onClick={handleDeactivate}>
             Deactivate Account
           </Button>
         </DialogFooter>
