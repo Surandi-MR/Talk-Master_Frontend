@@ -10,6 +10,7 @@ export interface User {
   phone_no: string;
   role: UserRole;
   avatar?: string;
+  birthday?: string;
 }
 
 // Package Interface
