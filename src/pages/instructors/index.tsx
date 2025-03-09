@@ -1,90 +1,153 @@
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Eye, Plus } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { StudentCard } from "../students/components/StudentCard";
+import { InstructorDetailsDialog } from "./components/InstructorDetailsDialog";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import axiosInstance from '@/lib/axiosInstance';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "sonner";
-import InstructorDetailsDialog from "./components/InstructorDetailsDialog";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { setInstructors } from "@/store/slices/instructorsSlice";
 
-// Mock data for demonstration
-const MOCK_INSTRUCTORS = [
-  {
-    id: '1',
-    firstName: 'Sarah',
-    lastName: 'Johnson',
-    email: 'sarah.johnson@example.com',
-    phone_no: '+1234567890',
-    gender: 'Female',
-    joinedDate: '2024-01-10',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-    rating: 4.8,
-    totalSessions: 156,
-    completedSessions: 150,
-    upcomingSessions: [
-      { id: '1', date: '2024-03-20', student: 'John Doe', time: '10:00 AM' },
-      { id: '2', date: '2024-03-21', student: 'Jane Smith', time: '2:00 PM' },
-    ],
-  },
-  {
-    id: '2',
-    firstName: 'Michael',
-    lastName: 'Chen',
-    email: 'michael.chen@example.com',
-    phone_no: '+1987654321',
-    gender: 'Male',
-    joinedDate: '2024-01-15',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e',
-    rating: 4.9,
-    totalSessions: 142,
-    completedSessions: 138,
-    upcomingSessions: [
-      { id: '3', date: '2024-03-20', student: 'Alice Brown', time: '3:00 PM' },
-      { id: '4', date: '2024-03-22', student: 'Bob Wilson', time: '11:00 AM' },
-    ],
-  },
-];
+interface Instructor {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone_no: string;
+  birthday: string;
+  role: string;
+  created_at: string;
+}
 
-interface AddInstructorFormData {
+interface AddStudentFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+interface FormErrors {
   firstName: string;
   lastName: string;
   email: string;
 }
 
 export function Instructors() {
-  const [selectedInstructor, setSelectedInstructor] = useState<typeof MOCK_INSTRUCTORS[0] | null>(null);
+  const dispatch = useDispatch();
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
+    null
+  ); // Changed to store ID only
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [formData, setFormData] = useState<AddInstructorFormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
+  const [formData, setFormData] = useState<AddStudentFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
   });
+  const [formErrors, setFormErrors] = useState<FormErrors>({
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleViewDetails = (instructorId: string) => {
-    const instructor = MOCK_INSTRUCTORS.find(i => i.id === instructorId);
-    if (instructor) {
-      setSelectedInstructor(instructor);
-      setIsDetailsOpen(true);
-    }
+  const instructors = useSelector(
+    (state: RootState) => state.instructors.instructors
+  ) as Instructor[];
+
+  useEffect(() => {
+    // Fetch instructors data from API
+    axiosInstance
+      .get(`/api/user/role/INSTRUCTOR`)
+      .then((response) => {
+        dispatch(setInstructors(response.data));
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error("Failed to fetch instructors. Please try again.");
+      });
+  }, [dispatch]);
+
+  const handleViewDetails = (studentId: string) => {
+    // Just set the instructor ID and open the dialog
+    setSelectedStudentId(studentId);
+    setIsDetailsOpen(true);
   };
 
-  const handleCreate = async () => {
+  const validateForm = (): boolean => {
+    const errors: FormErrors = {
+      firstName: "",
+      lastName: "",
+      email: "",
+    };
+
+    let isValid = true;
+
+    // First name validation
+    if (!formData.firstName.trim()) {
+      errors.firstName = "First name is required";
+      isValid = false;
+    } else if (formData.firstName.length < 2) {
+      errors.firstName = "First name must be at least 2 characters";
+      isValid = false;
+    } else if (formData.firstName.length > 50) {
+      errors.firstName = "First name cannot exceed 50 characters";
+      isValid = false;
+    }
+
+    // Last name validation
+    if (!formData.lastName.trim()) {
+      errors.lastName = "Last name is required";
+      isValid = false;
+    } else if (formData.lastName.length < 2) {
+      errors.lastName = "Last name must be at least 2 characters";
+      isValid = false;
+    } else if (formData.lastName.length > 50) {
+      errors.lastName = "Last name cannot exceed 50 characters";
+      isValid = false;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      errors.email = "Email is required";
+      isValid = false;
+    } else if (!emailRegex.test(formData.email)) {
+      errors.email = "Please enter a valid email address";
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const handleCreate = () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
     axiosInstance
       .post("/api/user/create", { ...formData, role: "INSTRUCTOR" })
       .then(() => {
         toast.success(
           "Registration successful! Generated password is sent to the email provided."
         );
+        // Optionally, refetch the instructor list after creating a new instructor
+        axiosInstance.get(`/api/user/role/INSTRUCTOR`).then((response) => {
+          dispatch(setInstructors(response.data));
+        });
+        setIsAddOpen(false);
+        setFormData({ firstName: "", lastName: "", email: "" });
       })
       .catch((error) => {
         console.error(error);
@@ -97,16 +160,44 @@ export function Instructors() {
         } else {
           toast.error("Something went wrong. Please try again.");
         }
+      })
+      .finally(() => {
+        setIsSubmitting(false);
       });
-    setIsAddOpen(false);
-    setFormData({ firstName: '', lastName: '', email: '' });
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      // Reset form state when dialog closes
+      setFormData({ firstName: "", lastName: "", email: "" });
+      setFormErrors({ firstName: "", lastName: "", email: "" });
+    }
+    setIsAddOpen(open);
+  };
+
+  const handleInputChange = (
+    field: keyof AddStudentFormData,
+    value: string
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    // Clear error for this field as user types
+    if (formErrors[field]) {
+      setFormErrors((prev) => ({
+        ...prev,
+        [field]: "",
+      }));
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Instructors</h1>
-        <Button 
+        <Button
           className="bg-[#DC2626] hover:bg-[#B91C1C]"
           onClick={() => setIsAddOpen(true)}
         >
@@ -116,41 +207,27 @@ export function Instructors() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {MOCK_INSTRUCTORS.map((instructor) => (
-          <Card key={instructor.id} className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={instructor.avatar} alt={`${instructor.firstName} ${instructor.lastName}`} />
-                  <AvatarFallback>{instructor.firstName[0]}{instructor.lastName[0]}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold text-lg">{instructor.firstName} {instructor.lastName}</h3>
-                  <p className="text-sm text-muted-foreground">{instructor.email}</p>
-                  <p className="text-sm font-medium text-yellow-600">★ {instructor.rating}</p>
-                </div>
-                <Button 
-                  className="w-full bg-[#DC2626] hover:bg-[#B91C1C]"
-                  onClick={() => handleViewDetails(instructor.id)}
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  View Details
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        {instructors.map((instructor) => (
+          <StudentCard
+            key={instructor.id}
+            student={instructor}
+            onViewDetails={handleViewDetails}
+          />
         ))}
       </div>
 
-      {selectedInstructor && (
+      {selectedStudentId && (
         <InstructorDetailsDialog
-          instructor={selectedInstructor}
+          studentId={selectedStudentId}
           open={isDetailsOpen}
-          onOpenChange={setIsDetailsOpen}
+          onOpenChange={(open) => {
+            setIsDetailsOpen(open);
+            if (!open) setSelectedStudentId(null);
+          }}
         />
       )}
 
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+      <Dialog open={isAddOpen} onOpenChange={handleDialogClose}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Instructor</DialogTitle>
@@ -162,16 +239,46 @@ export function Instructors() {
                 <Input
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
+                  aria-invalid={!!formErrors.firstName}
+                  aria-describedby={
+                    formErrors.firstName ? "firstName-error" : undefined
+                  }
+                  disabled={isSubmitting}
                 />
+                {formErrors.firstName && (
+                  <p
+                    id="firstName-error"
+                    className="text-sm font-medium text-red-500"
+                  >
+                    {formErrors.firstName}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
+                  aria-invalid={!!formErrors.lastName}
+                  aria-describedby={
+                    formErrors.lastName ? "lastName-error" : undefined
+                  }
+                  disabled={isSubmitting}
                 />
+                {formErrors.lastName && (
+                  <p
+                    id="lastName-error"
+                    className="text-sm font-medium text-red-500"
+                  >
+                    {formErrors.lastName}
+                  </p>
+                )}
               </div>
             </div>
             <div className="space-y-2">
@@ -180,19 +287,35 @@ export function Instructors() {
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                aria-invalid={!!formErrors.email}
+                aria-describedby={formErrors.email ? "email-error" : undefined}
+                disabled={isSubmitting}
               />
+              {formErrors.email && (
+                <p
+                  id="email-error"
+                  className="text-sm font-medium text-red-500"
+                >
+                  {formErrors.email}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => handleDialogClose(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button 
+            <Button
               className="bg-[#DC2626] hover:bg-[#B91C1C]"
               onClick={handleCreate}
+              disabled={isSubmitting}
             >
-              Create
+              {isSubmitting ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>
