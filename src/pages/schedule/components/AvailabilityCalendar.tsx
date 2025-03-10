@@ -10,6 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Instructor {
   id: string;
@@ -58,6 +65,7 @@ export function AvailabilityCalendar() {
   const [selectedSession, setSelectedSession] = useState<ISession | null>(null);
   const [meetingLink, setMeetingLink] = useState<string>("");
   const [topic, setTopic] = useState<string>("");
+  const [status, setStatus] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchSessions = () => {
@@ -168,6 +176,7 @@ export function AvailabilityCalendar() {
     setSelectedSession(session);
     setMeetingLink(session.meetingLink || "");
     setTopic(session.topic || "");
+    setStatus(session.status);
     setShowDetails(true);
   };
 
@@ -176,6 +185,7 @@ export function AvailabilityCalendar() {
     setSelectedSession(null);
     setMeetingLink("");
     setTopic("");
+    setStatus("");
   };
 
   const handleSubmitSessionDetails = (e: React.FormEvent) => {
@@ -188,6 +198,7 @@ export function AvailabilityCalendar() {
     const requestBody = {
       meetingLink: meetingLink,
       topic: topic,
+      status: status,
     };
 
     axiosInstance
@@ -254,10 +265,7 @@ export function AvailabilityCalendar() {
                 <span className="font-medium">Time:</span>{" "}
                 {format(new Date(selectedSession.time), "h:mm a, MMMM d, yyyy")}
               </div>
-              <div>
-                <span className="font-medium">Status:</span>{" "}
-                {selectedSession.status}
-              </div>
+
               {selectedSession.studdent && (
                 <div>
                   <span className="font-medium">Student:</span>{" "}
@@ -273,54 +281,62 @@ export function AvailabilityCalendar() {
                 </div>
               )}
 
-              {/* Only show form for scheduled sessions */}
-              {selectedSession.status === "SCHEDULED" && (
-                <form
-                  onSubmit={handleSubmitSessionDetails}
-                  className="space-y-4 mt-4"
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="topic">Topic</Label>
-                    <Input
-                      id="topic"
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                      placeholder="Enter session topic"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="meetingLink">Meeting Link</Label>
-                    <Input
-                      id="meetingLink"
-                      value={meetingLink}
-                      onChange={(e) => setMeetingLink(e.target.value)}
-                      placeholder="Enter meeting link"
-                    />
-                  </div>
-
-                  <div className="flex justify-end gap-2 mt-6">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={closeDetails}
-                      disabled={isSubmitting}
-                    >
-                      Close
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "Saving..." : "Save Changes"}
-                    </Button>
-                  </div>
-                </form>
-              )}
-
-              {/* For non-scheduled sessions, just show a close button */}
-              {selectedSession.status !== "SCHEDULED" && (
-                <div className="mt-6 flex justify-end">
-                  <Button onClick={closeDetails}>Close</Button>
+              {/* We now show the form for all sessions */}
+              <form
+                onSubmit={handleSubmitSessionDetails}
+                className="space-y-4 mt-4"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger id="status">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SCHEDULED">SCHEDULED</SelectItem>
+                      <SelectItem value="CANCELED">CANCELED</SelectItem>
+                      <SelectItem value="COMPLETED">COMPLETED</SelectItem>
+                      {selectedSession.status === "AVAILABLE" && (
+                        <SelectItem value="AVAILABLE">AVAILABLE</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="topic">Topic</Label>
+                  <Input
+                    id="topic"
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    placeholder="Enter session topic"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="meetingLink">Meeting Link</Label>
+                  <Input
+                    id="meetingLink"
+                    value={meetingLink}
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                    placeholder="Enter meeting link"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 mt-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={closeDetails}
+                    disabled={isSubmitting}
+                  >
+                    Close
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
