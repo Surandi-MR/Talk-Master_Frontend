@@ -12,7 +12,12 @@ interface TimeSlotsProps {
   onViewSession?: (session: ISession) => void;
 }
 
-type SlotStatus = "available" | "leave" | "scheduled";
+type SlotStatus =
+  | "available"
+  | "leave"
+  | "scheduled"
+  | "completed"
+  | "canceled";
 
 interface TimeSlot {
   time: string;
@@ -56,8 +61,15 @@ export function TimeSlots({
         let status: SlotStatus = "leave"; // Default status
 
         if (matchingSession) {
-          status =
-            matchingSession.status === "SCHEDULED" ? "scheduled" : "available";
+          if (matchingSession.status === "SCHEDULED") {
+            status = "scheduled";
+          } else if (matchingSession.status === "COMPLETED") {
+            status = "completed";
+          } else if (matchingSession.status === "CANCELED") {
+            status = "canceled";
+          } else {
+            status = "available";
+          }
         }
 
         slots.push({
@@ -120,11 +132,19 @@ export function TimeSlots({
           </Button>
         );
       case "scheduled":
+      case "completed":
+      case "canceled":
         return (
           <Button
             variant="outline"
             size="sm"
-            className="ml-auto text-blue-600 hover:text-blue-700"
+            className={`ml-auto ${
+              slot.status === "completed"
+                ? "text-purple-600 hover:text-purple-700"
+                : slot.status === "canceled"
+                ? "text-red-600 hover:text-red-700"
+                : "text-blue-600 hover:text-blue-700"
+            }`}
             onClick={() => slot.session && handleViewSession(slot.session)}
           >
             <Eye className="h-4 w-4 mr-1" />
@@ -142,6 +162,10 @@ export function TimeSlots({
         return "bg-yellow-50 border-yellow-200";
       case "scheduled":
         return "bg-blue-50 border-blue-200";
+      case "completed":
+        return "bg-purple-50 border-purple-200";
+      case "canceled":
+        return "bg-red-50 border-red-200";
     }
   };
 
@@ -174,53 +198,6 @@ export function TimeSlots({
           ))}
         </div>
       </div>
-
-      {/* {showDetails && selectedSession && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Session Details</h3>
-            <div className="space-y-3">
-              <div>
-                <span className="font-medium">Time:</span>{" "}
-                {format(new Date(selectedSession.time), "h:mm a, MMMM d, yyyy")}
-              </div>
-              <div>
-                <span className="font-medium">Status:</span>{" "}
-                {selectedSession.status}
-              </div>
-              {selectedSession.studdent && (
-                <div>
-                  <span className="font-medium">Student:</span>{" "}
-                  {selectedSession.studdent.firstName}{" "}
-                  {selectedSession.studdent.lastName}
-                </div>
-              )}
-              {selectedSession.instructor && (
-                <div>
-                  <span className="font-medium">Instructor:</span>{" "}
-                  {selectedSession.instructor.firstName}{" "}
-                  {selectedSession.instructor.lastName}
-                </div>
-              )}
-              {selectedSession.topic && (
-                <div>
-                  <span className="font-medium">Topic:</span>{" "}
-                  {selectedSession.topic}
-                </div>
-              )}
-              {selectedSession.meetingLink && (
-                <div>
-                  <span className="font-medium">Meeting Link:</span>{" "}
-                  {selectedSession.meetingLink}
-                </div>
-              )}
-            </div>
-            <div className="mt-6 flex justify-end">
-              <Button onClick={closeDetails}>Close</Button>
-            </div>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 }
