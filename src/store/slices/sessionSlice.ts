@@ -2,7 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Session } from '@/types';
 
 interface SessionState {
-  sessions: Session[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sessions: any[];
   upcomingSessions: Session[];
   isLoading: boolean;
   error: string | null;

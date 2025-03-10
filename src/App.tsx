@@ -1,23 +1,23 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { Toaster } from '@/components/ui/sonner';
-import { ThemeProvider } from './components/theme/ThemeProvider';
-import { store } from './store';
-import { Landing } from './pages/landing';
-import { Login } from './pages/auth/Login';
-import { Register } from './pages/auth/Register';
-import { DashboardLayout } from './components/layout/DashboardLayout';
-import { Dashboard } from './pages/dashboard';
-import { Packages } from './pages/packages';
-import { Students } from './pages/students';
-import { Instructors } from './pages/instructors';
-import { Sessions } from './pages/sessions';
-import { Schedule } from './pages/schedule';
-import { History } from './pages/history';
-import { About } from './pages/legal/About';
-import { PrivacyPolicy } from './pages/legal/PrivacyPolicy';
-import { TermsOfUse } from './pages/legal/TermsOfUse';
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Provider } from "react-redux";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "./components/theme/ThemeProvider";
+import { store } from "./store";
+import { Landing } from "./pages/landing";
+import { Login } from "./pages/auth/Login";
+import { Register } from "./pages/auth/Register";
+import { DashboardLayout } from "./components/layout/DashboardLayout";
+import { Dashboard } from "./pages/dashboard";
+import { Packages } from "./pages/packages";
+import { Students } from "./pages/students";
+import { Instructors } from "./pages/instructors";
+import { Sessions } from "./pages/sessions";
+import { Schedule } from "./pages/schedule";
+import { History } from "./pages/history";
+import { About } from "./pages/legal/About";
+import { PrivacyPolicy } from "./pages/legal/PrivacyPolicy";
+import { TermsOfUse } from "./pages/legal/TermsOfUse";
+import RoleGuard from "./components/layout/RoleGuard";
 export function App() {
   return (
     <Provider store={store}>
@@ -30,7 +30,7 @@ export function App() {
             <Route path="/terms" element={<TermsOfUse />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            
+
             {/* Protected Routes */}
             <Route
               path="/dashboard"
@@ -52,7 +52,9 @@ export function App() {
               path="/students"
               element={
                 <DashboardLayout>
-                  <Students />
+                  <RoleGuard role="ADMIN">
+                    <Students />
+                  </RoleGuard>
                 </DashboardLayout>
               }
             />
@@ -60,7 +62,9 @@ export function App() {
               path="/instructors"
               element={
                 <DashboardLayout>
-                  <Instructors />
+                  <RoleGuard role="ADMIN">
+                    <Instructors />
+                  </RoleGuard>
                 </DashboardLayout>
               }
             />
@@ -68,7 +72,9 @@ export function App() {
               path="/sessions"
               element={
                 <DashboardLayout>
-                  <Sessions />
+                  <RoleGuard role="STUDENT">
+                    <Sessions />
+                  </RoleGuard>
                 </DashboardLayout>
               }
             />
@@ -76,7 +82,9 @@ export function App() {
               path="/schedule"
               element={
                 <DashboardLayout>
-                  <Schedule />
+                  <RoleGuard role="INSTRUCTOR">
+                    <Schedule />
+                  </RoleGuard>
                 </DashboardLayout>
               }
             />

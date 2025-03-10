@@ -1,30 +1,36 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { InstructorCard } from './InstructorCard';
-
-// Mock data for demonstration
-const MOCK_INSTRUCTORS = [
-  { id: '1', name: 'Sarah Johnson', rating: 4.8, image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330' },
-  { id: '2', name: 'Michael Chen', rating: 4.9, image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e' },
-  { id: '3', name: 'Emma Williams', rating: 4.7, image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80' },
-];
+import { InstructorCard } from "./InstructorCard";
 
 interface AvailableInstructorsProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  instructors: any[];
   onSchedule: (instructorId: string) => void;
 }
 
-export function AvailableInstructors({ onSchedule }: AvailableInstructorsProps) {
-  return (
-    <div className="space-y-4 mt-6">
-      <h3 className="text-lg font-semibold">Available Instructors</h3>
-      <div className="space-y-4">
-        {MOCK_INSTRUCTORS.map((instructor) => (
-          <InstructorCard
-            key={instructor.id}
-            instructor={instructor}
-            onSchedule={onSchedule}
-          />
-        ))}
+export function AvailableInstructors({
+  instructors,
+  onSchedule,
+}: AvailableInstructorsProps) {
+  {if (instructors.length === 0) {
+    return (
+      <div className="space-y-4 mt-6">
+        <h3 className="text-lg font-semibold bg-red-500 p-5 text-cyan-50">No instructors available for the selected time and date</h3>
       </div>
-    </div>
-  );
+    );
+  }else{
+    return (
+      <div className="space-y-4 mt-6">
+        <h3 className="text-lg font-semibold">Available Instructors</h3>
+        <div className="space-y-4">
+          {instructors.map((instructor) => (
+            <InstructorCard
+              key={instructor.id}
+              instructor={instructor}
+              onSchedule={onSchedule}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  }
 }

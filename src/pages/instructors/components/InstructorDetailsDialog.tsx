@@ -14,10 +14,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import axiosInstance from "@/lib/axiosInstance";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 
 // Define the structure of the detailed Instructor (matching the backend DTO)
 interface User {
@@ -102,21 +102,21 @@ export function InstructorDetailsDialog({
     }
   }, [studentId, open]);
 
-  const handleDeactivate = () => {
-    // Make an API call to deactivate the Instructor
-    axiosInstance
-      .put(`/api/user/${studentId}/deactivate`) // Adjust the endpoint as needed
-      .then(() => {
-        toast.success("Instructor account deactivated successfully.");
-        onOpenChange(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error(
-          "Failed to deactivate Instructor account. Please try again."
-        );
-      });
-  };
+  // const handleDeactivate = () => {
+  //   // Make an API call to deactivate the Instructor
+  //   axiosInstance
+  //     .put(`/api/user/${studentId}/deactivate`) // Adjust the endpoint as needed
+  //     .then(() => {
+  //       toast.success("Instructor account deactivated successfully.");
+  //       onOpenChange(false);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //       toast.error(
+  //         "Failed to deactivate Instructor account. Please try again."
+  //       );
+  //     });
+  // };
 
   if (loading) {
     return (
@@ -219,9 +219,9 @@ export function InstructorDetailsDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="destructive" onClick={handleDeactivate}>
+          {/* <Button variant="destructive" onClick={handleDeactivate}>
             Deactivate Account
-          </Button>
+          </Button> */}
         </DialogFooter>
       </DialogContent>
     </Dialog>

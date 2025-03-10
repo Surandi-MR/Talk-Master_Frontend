@@ -1,11 +1,11 @@
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import { DashboardStats } from './components/DashboardStats';
+// import { DashboardStats } from './components/DashboardStats';
 import { AdminStats } from './components/AdminStats';
 import { InstructorStats } from './components/InstructorStats';
 import { WelcomeCard } from './components/WelcomeCard';
 import { QuickActions } from './components/QuickActions';
-import { UpcomingSessions } from './components/UpcomingSessions';
+// import { UpcomingSessions } from './components/UpcomingSessions';
 
 export function Dashboard() {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -18,18 +18,22 @@ export function Dashboard() {
         return (
           <>
             <InstructorStats />
-            <UpcomingSessions />
+            {/* <UpcomingSessions /> */}
           </>
         );
       default: // STUDENT
         return (
           <>
-            <DashboardStats />
+            <h1 className="text-3xl font-bold">Student</h1>
+            <h2 className="text-3xl font-bold text-red-400 text-center">
+              Welcome to Talk Master
+            </h2>
+            {/* <DashboardStats /> */}
             <div className="grid md:grid-cols-2 gap-6">
               <WelcomeCard />
               <QuickActions />
             </div>
-            <UpcomingSessions />
+            {/* <UpcomingSessions /> */}
           </>
         );
     }
