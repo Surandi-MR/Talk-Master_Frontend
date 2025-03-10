@@ -6,7 +6,7 @@ import {
   LayoutDashboard,
   Package,
   Calendar,
-  History,
+  // History,
   GraduationCap,
   UserCheck,
 } from 'lucide-react';
@@ -29,12 +29,12 @@ export function Sidebar({ onNavigate, isMobile }: SidebarProps) {
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Packages', href: '/packages', icon: Package },
       { name: 'My Sessions', href: '/sessions', icon: Calendar },
-      { name: 'History', href: '/history', icon: History },
+      // { name: 'History', href: '/history', icon: History },
     ],
     INSTRUCTOR: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Schedule', href: '/schedule', icon: Calendar },
-      { name: 'History', href: '/history', icon: History },
+      // { name: 'History', href: '/history', icon: History },
     ],
     ADMIN: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },

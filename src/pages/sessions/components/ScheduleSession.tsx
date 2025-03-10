@@ -4,21 +4,68 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { TimeSlotSelect } from './TimeSlotSelect';
 import { AvailableInstructors } from './AvailableInstructors';
+import axiosInstance from '@/lib/axiosInstance';
+import { format } from "date-fns";
+import { RootState } from '@/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'sonner';
+import { addSession } from '@/store/slices/sessionSlice';
 
 export function ScheduleSession() {
   const [date, setDate] = useState<Date>();
   const [time, setTime] = useState<string>();
   const [showInstructors, setShowInstructors] = useState(false);
+  const [instructors, setInstructors] = useState([]);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useDispatch();
 
-  const handleFindInstructor = () => {
+  const handleFindInstructor = async () => {
     if (date && time) {
-      setShowInstructors(true);
+      const dateString = format(date, "yyyy-MM-dd");
+      const [hours, minutes] = time.split(':');
+      const startTimeStr = `${dateString}T${hours}:${minutes}:00`;
+      // startTime.setHours(parseInt(hours), parseInt(minutes));
+
+      try {
+        axiosInstance.get(`/api/sessions?status=AVAILABLE&startTime=${startTimeStr}`)
+          .then((response) => {
+            setInstructors(response.data);
+            setShowInstructors(true);
+          });
+      } catch (error) {
+        console.error('Error fetching instructors:', error);
+        toast.error('Error fetching instructors');
+      }
     }
   };
 
   const handleSchedule = (instructorId: string) => {
     console.log('Scheduling with instructor:', instructorId, 'for', date, 'at', time);
-    // Here you would typically make an API call to schedule the session
+    
+    if (user) {
+      const requestBody = {
+        studentId: user.id,
+        status: "SCHEDULED"
+      };
+
+      axiosInstance.put(`/api/sessions/schedule/${instructorId}`, requestBody)
+        .then((response) => {
+          console.log('Session scheduled successfully:', response.data);
+          toast.success('Session scheduled successfully');
+          setShowInstructors(false);
+          setInstructors([]);
+          dispatch(addSession(response
+            .data));
+        })
+        .catch((error) => {
+          console.error('Error scheduling session:', error);
+          const errorMessage = error.response?.data?.error || 'Error scheduling session';
+          toast.error(errorMessage);
+        });
+    } else {
+      console.error('User is not logged in');
+      toast.error('Please log in to schedule a session');
+    }
   };
 
   // Get today's date at the start of the day
@@ -55,7 +102,7 @@ export function ScheduleSession() {
         </div>
 
         {showInstructors && (
-          <AvailableInstructors onSchedule={handleSchedule} />
+          <AvailableInstructors instructors={instructors} onSchedule={handleSchedule} />
         )}
       </CardContent>
     </Card>
